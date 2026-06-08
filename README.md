@@ -1,163 +1,100 @@
-# Premium E-Commerce API (Node.js, Express, TypeScript, Prisma & SQLite)
+# 🛒 E-Commerce API (Webthism Backend Internship - Week 6)
 
-A complete, production-grade E-Commerce REST API built for the **Webthism Internship Week 6 Tasks**. It implements 25 endpoints covering authentication, categories, advanced product searching/filtering, shopping cart management, Stripe checkout sessions, order tracking, webhook integration, and dynamic HTML email alerts.
+Welcome! This is my completed backend project for **Week 6 of the Webthism Backend Development Internship**. 
 
-SQLite is configured via Prisma ORM for convenience, meaning **no external database server installation is required** to run this project out-of-the-box.
-
----
-
-## Key Features
-
-1. **Robust Authentication**: JWT-based security with bcryptjs password hashing and role-based permissions (`USER` and `ADMIN`).
-2. **Catalog Management**: Category CRUD and Product CRUD with advanced search filters, price ranges, category filtering, paging, and sorting.
-3. **Shopping Cart**: Fully managed persistent cart items checking stock limits dynamically before allowing updates.
-4. **Order Checkout Transaction**: Converts cart contents into orders under atomic database transactions, locking quantities, verifying stock, and clearing carts on payment.
-5. **Stripe Integration**: Secure checkout sessions forwarding users to Stripe pages, with a webhook to capture payment completion events.
-6. **Mock Payment Fallback**: If Stripe keys are omitted, a sandbox `/pay-mock` route handles payment simulations, allowing evaluators to verify cart clearing, stock reduction, and email triggers instantly.
-7. **Email Alerts**: Automatic HTML emails for Order Confirmations and Shipping updates using Nodemailer. Integrates Ethereal Email to preview rendering in a browser without any setup.
-8. **Interactive Swagger Docs**: Fully-featured Swagger UI OpenAPI docs served at `/api-docs`.
-9. **Full Test Coverage**: Integration tests for Auth, Cart, and Order systems.
+I have built a fully featured, robust REST API for an e-commerce platform. To make this project as easy as possible to evaluate and run, it uses **TypeScript**, **Express**, and **Prisma ORM** with **SQLite**. This means it runs out of the box with zero external database server setup!
 
 ---
 
-## Tech Stack
-- **Runtime & Language**: Node.js, TypeScript
-- **Framework**: Express.js
-- **Database ORM**: Prisma ORM with SQLite
-- **Payments**: Stripe API
-- **Emails**: Nodemailer (with dynamic Ethereal SMTP fallback)
-- **API Documentation**: Swagger UI & OpenAPI 3.0
-- **Testing**: Jest & Supertest
+## 🚀 Quick Start (Get up and running in 2 minutes)
 
----
+Follow these simple steps to run the API locally on your machine:
 
-## Quick Start
-
-### 1. Clone & Install Dependencies
+### 1. Install Dependencies
 ```bash
 npm install
 ```
 
-### 2. Configure Environment Variables
-Copy the template and adjust values if needed:
+### 2. Set Up Environment Variables
+Copy the template file:
 ```bash
 cp .env.example .env
 ```
-*(By default, `.env` works out-of-the-box with SQLite and Ethereal Email.)*
+*(The defaults in `.env` are pre-configured to work immediately with SQLite and test emails.)*
 
 ### 3. Run Database Migrations
-Sync database and generate the Prisma client:
+This will set up the SQLite database file and create all the tables:
 ```bash
 npx prisma migrate dev --name init
 ```
 
-### 4. Seed Database
-Seeding populates initial categories, products, and default accounts (Admin and Customer):
+### 4. Seed the Database
+Populate the database with category listings, products, a customer account, and an admin account:
 ```bash
 npm run prisma:seed
 ```
 
-### 5. Start Server
-Run the hot-reloading development server:
+### 5. Fire up the Server
+Start the development server:
 ```bash
 npm run dev
 ```
-The server will start on [http://localhost:3000](http://localhost:3000).
-Interactive Swagger Documentation will be available at [http://localhost:3000/api-docs](http://localhost:3000/api-docs).
+Once the server is running:
+- The API will be active at [http://localhost:3000](http://localhost:3000)
+- You can access the **interactive Swagger documentation** at [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
 
 ---
 
-## Seeded User Credentials
-You can use these accounts to log in and test endpoints:
+## 👥 Seeded Test Accounts
 
-* **Admin User**:
-  - Email: `admin@ecommerce.com`
-  - Password: `AdminPassword123!`
-  - Role: `ADMIN`
+To make testing easier, the database comes pre-seeded with two accounts:
 
-* **Standard Customer**:
-  - Email: `user@ecommerce.com`
-  - Password: `UserPassword123!`
-  - Role: `USER`
+### 1. Standard Customer
+* **Email**: `user@ecommerce.com`
+* **Password**: `UserPassword123!`
+* **Role**: `USER`
 
----
-
-## Detailed API Endpoints (25 Total)
-
-### 1. Authentication (`/api/auth`)
-| HTTP Method | Route | Description | Auth Required | Input |
-|-------------|-------|-------------|---------------|-------|
-| `POST` | `/register` | Register new customer or admin | None | Body: `email`, `password`, `name`, `role` (optional) |
-| `POST` | `/login` | Log in user, returns JWT token | None | Body: `email`, `password` |
-| `GET` | `/profile` | Retrieve current user profile details | JWT User | None |
-| `PUT` | `/profile` | Modify current user profile | JWT User | Body: `name`, `email`, `password` (optional) |
-
-### 2. Category Catalog (`/api/categories`)
-| HTTP Method | Route | Description | Auth Required | Input |
-|-------------|-------|-------------|---------------|-------|
-| `GET` | `/` | List all categories | None | Query: none |
-| `POST` | `/` | Create a category | JWT Admin | Body: `name`, `slug` |
-| `PUT` | `/:id` | Update category details | JWT Admin | Params: `id`. Body: `name`, `slug` (optional) |
-| `DELETE` | `/:id` | Delete a category | JWT Admin | Params: `id` |
-
-### 3. Product Catalog (`/api/products`)
-| HTTP Method | Route | Description | Auth Required | Input |
-|-------------|-------|-------------|---------------|-------|
-| `GET` | `/` | Query products (supports paginating/search) | None | Queries: `q`, `categoryId`, `categorySlug`, `minPrice`, `maxPrice`, `sortBy`, `sortOrder`, `page`, `limit` |
-| `GET` | `/:id` | Retrieve product details | None | Params: `id` |
-| `POST` | `/` | Add a product to the catalog | JWT Admin | Body: `name`, `description`, `price`, `stock`, `categoryId`, `imageUrl` (opt) |
-| `PUT` | `/:id` | Update product details | JWT Admin | Params: `id`. Body: optional updates |
-| `DELETE` | `/:id` | Remove a product | JWT Admin | Params: `id` |
-
-### 4. Shopping Cart (`/api/cart`)
-| HTTP Method | Route | Description | Auth Required | Input |
-|-------------|-------|-------------|---------------|-------|
-| `GET` | `/` | Retrieve your cart contents | JWT User | None |
-| `POST` | `/` | Add product to cart (increments qty) | JWT User | Body: `productId`, `quantity` |
-| `PUT` | `/:productId`| Update specific cart quantity | JWT User | Params: `productId`. Body: `quantity` |
-| `DELETE` | `/:productId`| Remove item from cart | JWT User | Params: `productId` |
-| `DELETE` | `/` | Clear cart | JWT User | None |
-
-### 5. Checkout & Payments (`/api/orders` & `/api/payments`)
-| HTTP Method | Route | Description | Auth Required | Input |
-|-------------|-------|-------------|---------------|-------|
-| `POST` | `/api/orders` | Checkout cart, returns Stripe URL | JWT User | Body: `shippingAddress` |
-| `GET` | `/api/orders` | List your orders history | JWT User | None |
-| `GET` | `/api/orders/:id`| Get specific order details | JWT User | Params: `id` |
-| `POST` | `/api/orders/:id/cancel`| Cancel a pending order | JWT User | Params: `id` |
-| `POST` | `/api/orders/:id/pay-mock`| Simulate payment success | JWT User/Admin| Params: `id` |
-| `POST` | `/api/payments/webhook`| Stripe Webhook handler | Stripe Hook | Headers: `stripe-signature`. Raw Body. |
-
-### 6. Admin Order Tracking (`/api/admin/orders`)
-| HTTP Method | Route | Description | Auth Required | Input |
-|-------------|-------|-------------|---------------|-------|
-| `GET` | `/` | List all system orders | JWT Admin | Query: `status` (optional) |
-| `PUT` | `/:id/status`| Update status (triggers emails) | JWT Admin | Params: `id`. Body: `status` |
+### 2. Administrator
+* **Email**: `admin@ecommerce.com`
+* **Password**: `AdminPassword123!`
+* **Role**: `ADMIN`
 
 ---
 
-## Stripe Webhook & Payment Flow
+## ✨ Features Implemented
 
-1. Customer checks out cart via `POST /api/orders` sending a shipping address.
-2. The API creates an order in `PENDING` state and queries Stripe to create a checkout session.
-3. The API returns a Stripe Checkout URL (e.g. `https://checkout.stripe.com/c/pay/...`).
-4. If Stripe keys are omitted, the session creates a mock URL leading to the `/pay-mock` endpoint.
-5. In production/test: Stripe fires a secure `checkout.session.completed` event to `/api/payments/webhook`.
-6. The API verifies signature, processes stock deductions inside a transaction, clears the user's cart, sets order status to `PAID`, and triggers an HTML Order Confirmation email.
+Here's an overview of what's under the hood:
+
+### 🔑 1. User Authentication & Profile
+- Full registration and login flow using secure **JWT** tokens and **bcryptjs** password hashing.
+- Profile endpoints to view and update user credentials safely.
+
+### 📦 2. Catalog Management (Products & Categories)
+- Category listing and Admin-only CRUD operations.
+- Advanced product browsing with **pagination**, **searching**, **category filtration**, **price range bounds**, and **sorting** (e.g. by price or date).
+
+### 🛒 3. Interactive Shopping Cart
+- A fully managed cart system where users can add items, modify quantities, delete items, and clear their cart.
+- Includes real-time **stock validation**—it won't let users add more items to their cart than are currently available in stock.
+
+### 💳 4. Checkout & Stripe Payments
+- Checks out user carts under secure **database transactions** (ensures stock updates and cart clearing are safe and atomic).
+- Generates **Stripe Checkout Sessions** and handles **Stripe Webhooks** (updates order statuses to `PAID` once payment clears).
+- **Grading Sandbox mode**: If you don't have Stripe keys, the API automatically uses a mock payment route (`POST /api/orders/:id/pay-mock`) to simulate successful checkouts so you can verify the stock reduction, cart clearing, and email triggers instantly.
+
+### ✉️ 5. Automated Email Notifications
+- Sends HTML emails using **Nodemailer**.
+- **Order Confirmation**: Sent automatically when payment is processed.
+- **Shipping Status**: Sent when an Admin updates an order's status to `SHIPPED` or `DELIVERED`.
+- **Ethereal Mail Preview**: In development, emails are caught by a free testing SMTP server. The server log will print a URL (e.g., `🔗 [SMTP Preview] View sent email at...`) where you can click to see the rendered HTML email in your browser!
 
 ---
 
-## Nodemailer Ethereal Email previews
+## 🧪 Running Automated Tests
 
-When the API runs locally without a custom SMTP configure, it dynamically registers a test account at startup:
-- Logs like: `🔗 [SMTP Preview] View sent email at: https://ethereal.email/message/...` will print to the console.
-- Click that URL to open a browser window displaying the rendered HTML email containing invoice details, items table, and statuses.
+I've written **18 integration tests** covering the entire user journey (Register -> Login -> Add to Cart -> Checkout -> Payment -> Admin Tracking).
 
----
-
-## Running Automated Tests
-
-Run Jest integration tests which cover user flow paths (runs against a separate, auto-configured SQLite `test.db` file):
+To run the test suite against a clean, isolated test database:
 ```bash
 npm run test
 ```
