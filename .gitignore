@@ -1,0 +1,19 @@
+# Dependency directories
+node_modules/
+
+# Build outputs
+dist/
+
+# Local databases
+*.db
+*.db-journal
+
+# Environment files
+.env
+.env.test
+
+# Logs and system
+*.log
+npm-debug.log*
+.eslintcache
+.gemini/
