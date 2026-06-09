@@ -23,6 +23,10 @@ app.use('/api', router);
 
 setupSwagger(app);
 
+app.get('/', (req, res) => {
+  res.redirect('/api-docs');
+});
+
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', timestamp: new Date() });
 });
