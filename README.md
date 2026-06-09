@@ -45,6 +45,14 @@ Once the server is running:
 
 ---
 
+## 🌐 Live Vercel Deployment
+
+You can access the live host and interactive Swagger documentation:
+- **Live Base URL**: [https://webthism-backend-intern-task-6.vercel.app](https://webthism-backend-intern-task-6.vercel.app)
+- **Live Swagger Documentation**: [https://webthism-backend-intern-task-6.vercel.app/api-docs](https://webthism-backend-intern-task-6.vercel.app/api-docs)
+
+---
+
 ## 👥 Seeded Test Accounts
 
 To make testing easier, the database comes pre-seeded with two accounts:
